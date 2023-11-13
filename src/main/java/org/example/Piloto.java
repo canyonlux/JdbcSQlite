@@ -1,7 +1,6 @@
 package org.example;
-
 public class Piloto {
-    private int driverid; // Asumiendo que esta propiedad es gestionada automáticamente por la base de datos
+    private int driverid;
     private String code;
     private String forename;
     private String surname;
@@ -16,10 +15,6 @@ public class Piloto {
         this.dob = dob;
         this.nationality = nationality;
         this.url = url;
-    }
-
-    public Piloto(String number, String mika, String hakkinen, String date, String finland, String url) {
-
     }
 
     public int getDriverid() {

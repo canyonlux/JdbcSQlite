@@ -5,15 +5,17 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConectarConBaseDatos {
+public class OperacionesCRUDPilotos {
 
+    // Ruta de la base de datos
     private static final String RUTA_BASE_DATOS = Paths.get("src", "main", "resources", "db", "f12006sqlite.db").toString();
-    // Crear y agregar un nuevo piloto a la base de datos
-    public static boolean crearYAgregarPiloto(Piloto piloto) {
-            if (piloto.getCode() == null || piloto.getCode().isEmpty()) {
-                System.out.println("El código del piloto no puede ser nulo o vacío.");
-                return false;
-            }
+
+    // Método para crear y agregar un nuevo piloto a la base de datos
+    public static boolean crearYAgregarNuevoPiloto(Piloto piloto) {
+        if (piloto.getCode() == null || piloto.getCode().isEmpty()) {
+            System.out.println("El código del piloto no puede ser nulo o vacío.");
+            return false;
+        }
         String sqlAgregarPiloto = "INSERT INTO drivers (code, forename, surname, dob, nationality, url) VALUES (?,?,?,?,?,?)";
         return ejecutarActualizacion(sqlAgregarPiloto, ps -> {
             ps.setString(1, piloto.getCode());
@@ -25,7 +27,7 @@ public class ConectarConBaseDatos {
         });
     }
 
-    // Leer un piloto específico por ID
+    // Método para leer un piloto específico por su ID
     public static Piloto leerPiloto(int id) {
         String sqlConsultaPiloto = "SELECT * FROM drivers WHERE driverId = ?";
         try (Connection conexion = DriverManager.getConnection("jdbc:sqlite:" + RUTA_BASE_DATOS);
@@ -48,7 +50,7 @@ public class ConectarConBaseDatos {
         }
     }
 
-    // Leer todos los pilotos
+    // Método para leer todos los pilotos
     public static List<Piloto> leerPilotos() {
         String sqlConsultaTodos = "SELECT * FROM drivers";
         List<Piloto> pilotos = new ArrayList<>();
@@ -71,7 +73,7 @@ public class ConectarConBaseDatos {
         }
     }
 
-    // Actualizar un piloto
+    // Método para actualizar un piloto
     public static boolean actualizarPiloto(Piloto piloto) {
         String sqlActualizarPiloto = "UPDATE drivers SET code = ?, forename = ?, surname = ?, dob = ?, nationality = ?, url = ? WHERE driverId = ?";
         return ejecutarActualizacion(sqlActualizarPiloto, ps -> {
@@ -85,22 +87,21 @@ public class ConectarConBaseDatos {
         });
     }
 
-    // Borrar un piloto
+    // Método para borrar un piloto
     public static boolean borrarPiloto(Piloto piloto) {
         String sqlBorrarPiloto = "DELETE FROM drivers WHERE driverId = ?";
         return ejecutarActualizacion(sqlBorrarPiloto, ps -> ps.setInt(1, piloto.getDriverid()));
     }
 
-    // Mostrar la clasificación de pilotos
+    // Método para mostrar la clasificación de los pilotos
     public static void mostrarClasificacionPiloto() {
-        String sqlClasificacionPilotos = "SELECT d.code, sum(r.points) AS puntos FROM drivers d JOIN results r " +
-                "ON d.driverid = r.driverid GROUP BY d.code ORDER BY puntos DESC";
+        String sqlClasificacionPilotos = "SELECT d.code, sum(r.points) AS puntos FROM drivers d JOIN results r ON d.driverid = r.driverid GROUP BY d.code ORDER BY puntos DESC";
         ejecutarConsultaYMostrarResultados(sqlClasificacionPilotos, rs ->
                 System.out.println(rs.getString("code") + " " + rs.getInt("puntos"))
         );
     }
 
-    // Ejecuta una actualización en la base de datos
+    // Método privado para ejecutar una actualización en la base de datos
     private static boolean ejecutarActualizacion(String sql, SQLConsumer<PreparedStatement> preparador) {
         try (Connection conexion = DriverManager.getConnection("jdbc:sqlite:" + RUTA_BASE_DATOS);
              PreparedStatement consulta = conexion.prepareStatement(sql)) {
@@ -113,7 +114,7 @@ public class ConectarConBaseDatos {
         }
     }
 
-    // Ejecuta una consulta y procesa el ResultSet con un consumidor
+    // Método privado para ejecutar una consulta y procesar el ResultSet con un consumidor
     private static void ejecutarConsultaYMostrarResultados(String sql, SQLConsumer<ResultSet> consumidor) {
         try (Connection conexion = DriverManager.getConnection("jdbc:sqlite:" + RUTA_BASE_DATOS);
              PreparedStatement consulta = conexion.prepareStatement(sql);
@@ -127,6 +128,7 @@ public class ConectarConBaseDatos {
         }
     }
 
+    // Interfaz funcional para consumir SQL
     @FunctionalInterface
     private interface SQLConsumer<T> {
         void accept(T t) throws SQLException;
